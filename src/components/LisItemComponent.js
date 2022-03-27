@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import * as api from '../Api/Api';
 import PaginationControls from './Pagination';
-import FavoriteAuthors from './pages/FavoriteAuthors';
 import './ListItemComponent.css';
+import { useListItemContext } from '../contexts/ListItemContext';
 
-const ListItemComponent = () => {
-  const [authors, setAuthors] = useState([]);
+const ListItemComponent = (location) => {
+  const {
+    authors,
+    pageInfo,
+    updateAuthors,
+    getFavAuthor,
+    favAuthors,
+    setFavAuthors,
+  } = useListItemContext();
   const [page, setPage] = useState(1);
   const [resultsPerPage, setResultsPerPage] = useState(5);
-  const [pageInfo, setPageInfo] = useState({});
-  const [favAuthors, setFavAuthors] = useState([]);
-
-  const updateAuthors = async (page = 1, resultsPerPage = 5) => {
-    const { results, ...pageInfo } = await api.authors({
-      page,
-      resultsPerPage,
-    });
-    setAuthors(results);
-    setPageInfo(pageInfo);
-  };
-  const getFavAuthor = (id) => {
-    setFavAuthors(authors.filter((x) => x._id === id));
-  };
-  console.log('getFavAuthorById', favAuthors);
   useEffect(() => {
     if (page) updateAuthors(page, resultsPerPage);
   }, [page, resultsPerPage]);
+
+  const removeFavAuthorHandler = (index) => {
+    const _favAuthors = [...favAuthors];
+    _favAuthors.splice(index, 1);
+    setFavAuthors(_favAuthors);
+  };
 
   return (
     <>
@@ -36,7 +33,7 @@ const ListItemComponent = () => {
         setPage={setPage}
         setResultsPerPage={setResultsPerPage}
       />
-      <FavoriteAuthors data={favAuthors} />
+
       <div className='authorList condensed'>
         <table className='table table-bordered'>
           <thead>
@@ -48,22 +45,39 @@ const ListItemComponent = () => {
             </tr>
           </thead>
           <tbody>
-            {authors.map((author, index) => (
-              <tr key={index}>
-                <td>{author.name}</td>
-                <td>{author.bio}</td>
-                <td>{author.link}</td>
-                <td>
-                  <button
-                    type='button'
-                    onClick={() => getFavAuthor(author._id)}
-                  >
-                    Add Favorite
-                  </button>
-                  <button>Remove Favorite</button>
-                </td>
-              </tr>
-            ))}
+            {location.location === '/authors'
+              ? authors.map((val, index) => (
+                  <tr key={index}>
+                    <td>{val.name}</td>
+                    <td>{val.bio}</td>
+                    <td>{val.link}</td>
+                    <td>
+                      <button
+                        type='button'
+                        onClick={() => getFavAuthor(val._id)}
+                      >
+                        Add Favorite
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              : location.location === '/favoriteAuthors'
+              ? favAuthors.map((val, index) => (
+                  <tr key={index}>
+                    <td>{val.name}</td>
+                    <td>{val.bio}</td>
+                    <td>{val.link}</td>
+                    <td>
+                      <button
+                        type='button'
+                        onClick={() => removeFavAuthorHandler(index)}
+                      >
+                        Remove Favorite
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              : ''}
           </tbody>
         </table>
       </div>

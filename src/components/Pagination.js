@@ -10,7 +10,6 @@ export default function PaginationControls({
   setPage,
   setResultsPerPage,
 }) {
-  // How many page number to show in the pagination bar
   const MaxPageButtons = Math.min(totalPages, 4);
   const hasNextPage = totalPages > page;
   const hasPrevPage = page > 1;
@@ -22,7 +21,6 @@ export default function PaginationControls({
     numbers[0] = Math.max(1, totalPages + 1 - MaxPageButtons);
   }
 
-  // The array of page number buttons that will be displayed.
   const pageNumbers = range(...numbers).map((key) => (
     <Pagination.Item key={key} onClick={onClick(key)} active={key === page}>
       {key}
